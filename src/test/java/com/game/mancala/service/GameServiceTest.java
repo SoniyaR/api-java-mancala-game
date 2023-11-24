@@ -35,16 +35,16 @@ public class GameServiceTest {
     @InjectMocks GameService gameService;
 
     private List<PlayerPitsData> pitsData = new ArrayList<>();
-    private List<PlayerPitsData> updatedPitsData = new ArrayList<>();
     private List<PlayerPitsDataDto> expectedPlayerPitsList;
     private List<PlayerPitsDataDto> expectedPlayerPitsAfterMove;
+    private List<PlayerPitsData> gameOverPlayerPits;
+    private List<PlayerPitsData> pitsDataForCaptureCase;
     private Player p1, p2;
     private Game game;
-    private Instant createdTime;
 
     @BeforeEach
     public void setup() {
-        createdTime = Instant.now();
+        Instant createdTime = Instant.now();
         p1 = Player.builder().id(1L).isMyTurn(true).name("ABC").build();
         p2 = Player.builder().id(2L).isMyTurn(false).name("XYZ").build();
         game = Game.builder().id(1L).startTime(createdTime).build();
@@ -83,22 +83,6 @@ public class GameServiceTest {
                 PlayerPitsDataDto.builder().id(13L).playerName("XYZ").playerId(2L).gameId(1L).store(false).pebblesCount(6).sequence(13).build(),
                 PlayerPitsDataDto.builder().id(14L).playerName("XYZ").playerId(2L).gameId(1L).store(true).pebblesCount(0).sequence(14).build());
 
-        updatedPitsData = List.of(
-                PlayerPitsData.builder().id(1L).pebblesCount(6).playerGame(pg1).isStore(false).sequence(1).build(),
-                PlayerPitsData.builder().id(2L).pebblesCount(6).playerGame(pg1).isStore(false).sequence(2).build(),
-                PlayerPitsData.builder().id(3L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(3).build(),
-                PlayerPitsData.builder().id(4L).pebblesCount(7).playerGame(pg1).isStore(false).sequence(4).build(),
-                PlayerPitsData.builder().id(5L).pebblesCount(7).playerGame(pg1).isStore(false).sequence(5).build(),
-                PlayerPitsData.builder().id(6L).pebblesCount(7).playerGame(pg1).isStore(false).sequence(6).build(),
-                PlayerPitsData.builder().id(7L).pebblesCount(1).playerGame(pg1).isStore(true).sequence(7).build(),
-                PlayerPitsData.builder().id(8L).pebblesCount(7).playerGame(pg2).isStore(false).sequence(8).build(),
-                PlayerPitsData.builder().id(9L).pebblesCount(7).playerGame(pg2).isStore(false).sequence(9).build(),
-                PlayerPitsData.builder().id(10L).pebblesCount(6).playerGame(pg2).isStore(false).sequence(10).build(),
-                PlayerPitsData.builder().id(11L).pebblesCount(6).playerGame(pg2).isStore(false).sequence(11).build(),
-                PlayerPitsData.builder().id(12L).pebblesCount(6).playerGame(pg2).isStore(false).sequence(12).build(),
-                PlayerPitsData.builder().id(13L).pebblesCount(6).playerGame(pg2).isStore(false).sequence(13).build(),
-                PlayerPitsData.builder().id(14L).pebblesCount(0).playerGame(pg2).isStore(true).sequence(14).build());
-
         expectedPlayerPitsAfterMove = List.of(
                 PlayerPitsDataDto.builder().id(1L).playerName("ABC").playerId(1L).gameId(1L).store(false).pebblesCount(6).sequence(1).build(),
                 PlayerPitsDataDto.builder().id(2L).playerName("ABC").playerId(1L).gameId(1L).store(false).pebblesCount(6).sequence(2).build(),
@@ -114,6 +98,38 @@ public class GameServiceTest {
                 PlayerPitsDataDto.builder().id(12L).playerName("XYZ").playerId(2L).gameId(1L).store(false).pebblesCount(6).sequence(12).build(),
                 PlayerPitsDataDto.builder().id(13L).playerName("XYZ").playerId(2L).gameId(1L).store(false).pebblesCount(6).sequence(13).build(),
                 PlayerPitsDataDto.builder().id(14L).playerName("XYZ").playerId(2L).gameId(1L).store(true).pebblesCount(0).sequence(14).build());
+
+        gameOverPlayerPits = List.of(
+                PlayerPitsData.builder().id(1L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(1).build(),
+                PlayerPitsData.builder().id(2L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(2).build(),
+                PlayerPitsData.builder().id(3L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(3).build(),
+                PlayerPitsData.builder().id(4L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(4).build(),
+                PlayerPitsData.builder().id(5L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(5).build(),
+                PlayerPitsData.builder().id(6L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(6).build(),
+                PlayerPitsData.builder().id(7L).pebblesCount(34).playerGame(pg1).isStore(true).sequence(7).build(),
+                PlayerPitsData.builder().id(8L).pebblesCount(0).playerGame(pg2).isStore(false).sequence(8).build(),
+                PlayerPitsData.builder().id(9L).pebblesCount(0).playerGame(pg2).isStore(false).sequence(9).build(),
+                PlayerPitsData.builder().id(10L).pebblesCount(0).playerGame(pg2).isStore(false).sequence(10).build(),
+                PlayerPitsData.builder().id(11L).pebblesCount(0).playerGame(pg2).isStore(false).sequence(11).build(),
+                PlayerPitsData.builder().id(12L).pebblesCount(0).playerGame(pg2).isStore(false).sequence(12).build(),
+                PlayerPitsData.builder().id(13L).pebblesCount(0).playerGame(pg2).isStore(false).sequence(13).build(),
+                PlayerPitsData.builder().id(14L).pebblesCount(38).playerGame(pg2).isStore(true).sequence(14).build());
+
+        pitsDataForCaptureCase = List.of(
+                PlayerPitsData.builder().id(1L).pebblesCount(1).playerGame(pg1).isStore(false).sequence(1).build(),
+                PlayerPitsData.builder().id(2L).pebblesCount(2).playerGame(pg1).isStore(false).sequence(2).build(),
+                PlayerPitsData.builder().id(3L).pebblesCount(2).playerGame(pg1).isStore(false).sequence(3).build(),
+                PlayerPitsData.builder().id(4L).pebblesCount(1).playerGame(pg1).isStore(false).sequence(4).build(),
+                PlayerPitsData.builder().id(5L).pebblesCount(0).playerGame(pg1).isStore(false).sequence(5).build(),
+                PlayerPitsData.builder().id(6L).pebblesCount(8).playerGame(pg1).isStore(false).sequence(6).build(),
+                PlayerPitsData.builder().id(7L).pebblesCount(15).playerGame(pg1).isStore(true).sequence(7).build(),
+                PlayerPitsData.builder().id(8L).pebblesCount(4).playerGame(pg2).isStore(false).sequence(8).build(),
+                PlayerPitsData.builder().id(9L).pebblesCount(9).playerGame(pg2).isStore(false).sequence(9).build(),
+                PlayerPitsData.builder().id(10L).pebblesCount(9).playerGame(pg2).isStore(false).sequence(10).build(),
+                PlayerPitsData.builder().id(11L).pebblesCount(3).playerGame(pg2).isStore(false).sequence(11).build(),
+                PlayerPitsData.builder().id(12L).pebblesCount(8).playerGame(pg2).isStore(false).sequence(12).build(),
+                PlayerPitsData.builder().id(13L).pebblesCount(2).playerGame(pg2).isStore(false).sequence(13).build(),
+                PlayerPitsData.builder().id(14L).pebblesCount(8).playerGame(pg2).isStore(true).sequence(14).build());
     }
 
     @Test
@@ -146,7 +162,6 @@ public class GameServiceTest {
         BDDMockito.given(playerRepository.save(ArgumentMatchers.any())).willReturn(p1);
         BDDMockito.given(playerRepository.save(ArgumentMatchers.any())).willReturn(p2);
         Mockito.when(gamesRepository.save(ArgumentMatchers.any())).thenReturn(game);
-        Mockito.when(playerPitsRepository.saveAll(ArgumentMatchers.any())).thenReturn(pitsData);
         Mockito.when(playerPitsRepository.findByPlayerGameGameIdOrderBySequence(game.getId())).thenReturn(pitsData);
         Mockito.when(playerGamesRepository.saveAll(ArgumentMatchers.any()))
                 .thenReturn(List.of(PlayerGame.builder().game(game).player(p1).build(),
@@ -198,12 +213,10 @@ public class GameServiceTest {
     }
     @Test
     void shouldMakeMoveByPlayerFailureWithStore() throws BusinessRuleException {
-
         Long pitId = 3L;
         PlayerGame playerGame = PlayerGame.builder().player(p1).game(game).build();
         PlayerPitsData optPitData = PlayerPitsData.builder().sequence(3).isStore(true).pebblesCount(6).id(3L).playerGame(playerGame).build();
         Mockito.when(playerPitsRepository.findById(pitId)).thenReturn(Optional.of(optPitData));
-
         Assertions.assertThrows(BusinessRuleException.class, () -> gameService.makeMove(pitId, 1L));
     }
 
@@ -211,12 +224,49 @@ public class GameServiceTest {
     void shouldMakeMoveByPlayerFailureWithNoPit() {
         Long pitId = 100L;
         Mockito.when(playerPitsRepository.findById(pitId)).thenReturn(Optional.empty());
-
         Assertions.assertThrows(BusinessRuleException.class, () -> gameService.makeMove(pitId, 1L));
     }
 
     @Test
     void shouldTestRestartGameForSamePlayers() {
+        String[] players = new String[2];
+        players[0] = "ABC"; players[1] = "XYZ";
+        CreateGameDto createGameDto = CreateGameDto.builder()
+                .playerName(players).build();
+
+        Mockito.when(playerRepository.findByName("ABC")).thenReturn(Optional.of(p1));
+        Mockito.when(playerRepository.findByName("XYZ")).thenReturn(Optional.of(p2));
+        Mockito.when(gamesRepository.save(ArgumentMatchers.any())).thenReturn(game);
+        Mockito.when(playerGamesRepository.saveAll(ArgumentMatchers.any()))
+                .thenReturn(List.of(PlayerGame.builder().game(game).player(p1).build(),
+                        PlayerGame.builder().game(game).player(p2).build()));
+        Mockito.when(playerPitsRepository.findByPlayerGameGameIdOrderBySequence(game.getId())).thenReturn(pitsData);
+
+        GameDetailsDto expectedDto = GameDetailsDto.builder().isGameOver(false)
+                .pitsData(expectedPlayerPitsList).build();
+        GameDetailsDto dto = gameService.createNewGame(createGameDto);
+
+        org.assertj.core.api.Assertions.assertThat(dto).usingRecursiveComparison().isEqualTo(expectedDto);
+    }
+
+    @Test
+    void shouldReturnGameDetailsWhenOver() {
+        Mockito.when(playerPitsRepository.findByPlayerGameGameIdOrderBySequence(ArgumentMatchers.anyLong())).thenReturn(gameOverPlayerPits);
+        GameDetailsDto responseDto = gameService.getGameDetails(ArgumentMatchers.anyLong(), true);
+        Assertions.assertEquals(p2.getName(), responseDto.getWinnerName());
+    }
+
+    @Test
+    void shouldReturnIfGameIsOver() {
+        boolean isGameOverResponse = gameService.isGameOver(gameOverPlayerPits);
+        Assertions.assertTrue(isGameOverResponse);
+    }
+
+    @Test
+    void shouldCaptureOpponentsStones() {
+        PlayerPitsData currentPit = pitsDataForCaptureCase.get(3);
+
+        gameService.captureOpponentsStones(currentPit, pitsDataForCaptureCase);
 
     }
 }

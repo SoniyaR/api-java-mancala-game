@@ -1,5 +1,4 @@
-# Mancala Game Backend
-Repository For Backend Service for Mancala Game
+# Mancala Game Backend service
 
 #### Technical stack
 Java 17, H2 database, Junit Juniper

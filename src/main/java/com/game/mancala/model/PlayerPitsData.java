@@ -45,7 +45,7 @@ public class PlayerPitsData {
         return this.pebblesCount + count;
     }
 
-    public void resetPebbleCount() {
+    public void resetPebbleCountToZero() {
         this.pebblesCount = 0;
     }
 
