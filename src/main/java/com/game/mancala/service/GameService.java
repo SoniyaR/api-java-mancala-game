@@ -79,6 +79,33 @@ public class GameService {
         playerRepository.saveAll(toUpdate);
     }
 
+    public GameDetailsDto makeMove(Long pitId, Long playerId) {
+        Optional<PlayerPitsData> selectedPitData = playerPitsRepository.findById(pitId);
+        if (selectedPitData.isEmpty()) throw new BusinessRuleException("Pit does not exists");
+
+        PlayerPitsData selectedPit = selectedPitData.get();
+        boolean isPlayersTurn = selectedPit.getPlayerGame().getPlayer().isMyTurn();
+        if (!isPlayersTurn) {
+            throw new BusinessRuleException("Wait for your turn...");
+        }
+
+        boolean isPitClickable = !selectedPit.isStore()
+                && selectedPit.getPlayerGame().getPlayer().getId().equals(playerId)
+                && selectedPit.getPebblesCount() > 0;
+        if (!isPitClickable) {
+            throw new BusinessRuleException("Incorrect Pit, select different one.");
+        }
+
+        int pickedPebbles = selectedPit.getPebblesCount();
+        List<PlayerPitsData> pitsData = distributePebbles(pickedPebbles, selectedPit.getSequence(), playerId, selectedPit.getPlayerGame().getGame().getId());
+
+        boolean isGameOver = isGameOver(pitsData);
+        if (isGameOver) {
+            finishTheGame(selectedPit.getPlayerGame().getGame().getId());
+        }
+        return getGameDetails(selectedPit.getPlayerGame().getGame().getId(), isGameOver);
+    }
+
     private void generatePlayerPitsData(List<PlayerGame> playerGames) {
         int total_pits_per_player = PITS_PER_PLAYER + 1;
         List<PlayerPitsData> pitsData = new ArrayList<>();
@@ -129,38 +156,10 @@ public class GameService {
             int result = pits.stream().filter(p -> p.getPlayerGame().getPlayer().getId().equals(player.getId()) && !p.isStore())
                     .map(PlayerPitsData::getPebblesCount).reduce(Integer::sum).orElse(-1);
             if (result == 0) {
-                System.out.println("soni- Game is over " + player.getName());
                 return true;
             }
         }
         return false;
-    }
-
-    public GameDetailsDto makeMove(Long pitId, Long playerId) {
-        Optional<PlayerPitsData> selectedPitData = playerPitsRepository.findById(pitId);
-        if (selectedPitData.isEmpty()) throw new BusinessRuleException("Pit does not exists");
-
-        PlayerPitsData selectedPit = selectedPitData.get();
-        boolean isPlayersTurn = selectedPit.getPlayerGame().getPlayer().isMyTurn();
-        if (!isPlayersTurn) {
-            throw new BusinessRuleException("Wait for your turn...");
-        }
-
-        boolean isPitClickable = !selectedPit.isStore()
-                && selectedPit.getPlayerGame().getPlayer().getId().equals(playerId)
-                && selectedPit.getPebblesCount() > 0;
-        if (!isPitClickable) {
-            throw new BusinessRuleException("Incorrect Pit, select different one.");
-        }
-
-        int pickedPebbles = selectedPit.getPebblesCount();
-        List<PlayerPitsData> pitsData = distributePebbles(pickedPebbles, selectedPit.getSequence(), playerId, selectedPit.getPlayerGame().getGame().getId());
-
-        boolean isGameOver = isGameOver(pitsData);
-        if (isGameOver) {
-            finishTheGame(selectedPit.getPlayerGame().getGame().getId());
-        }
-        return getGameDetails(selectedPit.getPlayerGame().getGame().getId(), isGameOver);
     }
 
     private void finishTheGame(Long gameId) {
@@ -206,7 +205,6 @@ public class GameService {
             }else{
                 if (isLastPebble) {
                     if (currentPit.getPebblesCount() == 0 && !currentPit.isStore()) {
-                        System.out.println("soni- Players last filled pit was empty. Put own stone and stones from opposite pit and put in own store." + currentPit.getSequence());
                         captureOpponentsStones(currentPit, pits);
                         shouldAddPebble = false;
                     }
@@ -242,7 +240,6 @@ public class GameService {
 
         PlayerPitsData pitToCapture = pits.get(totalPitsInGame - currentPit.getSequence() - 1);
         int pitsToAddInStore = pitToCapture.getPebblesCount() + 1;
-        System.out.println("soni- pitsToAddInStore: " + pitsToAddInStore);
 
         List<PlayerPitsData> dataToSave = new ArrayList<>();
         PlayerPitsData storePit = getStorePitForCurrentPlayer(pits, currentPit.getPlayerGame().getPlayer().getId());

@@ -131,6 +131,7 @@ public class GameServiceTest {
         players[0] = "ABC"; players[1] = "";
         CreateGameDto createGameDto = CreateGameDto.builder()
                 .playerName(players).build();
+
         Assertions.assertThrows(BusinessRuleException.class, () -> gameService.createNewGame(createGameDto));
     }
 
@@ -141,6 +142,7 @@ public class GameServiceTest {
         CreateGameDto createGameDto = CreateGameDto.builder()
                 .playerName(players).build();
 
+        Mockito.when(playerRepository.findByName(ArgumentMatchers.anyString())).thenReturn(Optional.empty());
         BDDMockito.given(playerRepository.save(ArgumentMatchers.any())).willReturn(p1);
         BDDMockito.given(playerRepository.save(ArgumentMatchers.any())).willReturn(p2);
         Mockito.when(gamesRepository.save(ArgumentMatchers.any())).thenReturn(game);
@@ -153,16 +155,17 @@ public class GameServiceTest {
         GameDetailsDto expectedDto = GameDetailsDto.builder().isGameOver(false)
                 .pitsData(expectedPlayerPitsList).build();
         GameDetailsDto dto = gameService.createNewGame(createGameDto);
+
         org.assertj.core.api.Assertions.assertThat(dto).usingRecursiveComparison().isEqualTo(expectedDto);
     }
 
     @Test
     void shouldGetGameDetails() {
-
         Mockito.when(playerPitsRepository.findByPlayerGameGameIdOrderBySequence(game.getId())).thenReturn(pitsData);
         GameDetailsDto expectedDto = GameDetailsDto.builder().isGameOver(false)
                 .pitsData(expectedPlayerPitsList).build();
         GameDetailsDto dto = gameService.getGameDetails(game.getId());
+
         org.assertj.core.api.Assertions.assertThat(dto).usingRecursiveComparison().isEqualTo(expectedDto);
     }
 
@@ -177,17 +180,14 @@ public class GameServiceTest {
                 .thenReturn(pitsData);
         Mockito.when(playerRepository.updatePlayersTurn(1L, false)).thenReturn(1);
 
-        Mockito.when(playerPitsRepository.saveAll(ArgumentMatchers.any())).thenReturn(updatedPitsData);
-//        Mockito.when(playerPitsRepository.findByPlayerGameGameIdOrderBySequence(game.getId()))
-//                .thenReturn(updatedPitsData);
         GameDetailsDto responseDto = gameService.makeMove(pitId, 1L);
         GameDetailsDto expectedDto = GameDetailsDto.builder().isGameOver(false)
                 .pitsData(expectedPlayerPitsAfterMove).build();
+
         org.assertj.core.api.Assertions.assertThat(responseDto).usingRecursiveComparison().isEqualTo(expectedDto);
     }
     @Test
     void shouldMakeMoveByPlayerFailureWithoutTurn() throws BusinessRuleException {
-
         Long pitId = 3L;
         Player playerTest = Player.builder().name("ABC").id(1L).isMyTurn(false).build();
         PlayerGame playerGame = PlayerGame.builder().player(playerTest).game(game).build();
@@ -210,8 +210,7 @@ public class GameServiceTest {
     @Test
     void shouldMakeMoveByPlayerFailureWithNoPit() {
         Long pitId = 100L;
-        PlayerGame playerGame = PlayerGame.builder().player(p1).game(game).build();
-        Mockito.when(playerPitsRepository.findById(pitId)).thenReturn(Optional.ofNullable(null));
+        Mockito.when(playerPitsRepository.findById(pitId)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(BusinessRuleException.class, () -> gameService.makeMove(pitId, 1L));
     }
