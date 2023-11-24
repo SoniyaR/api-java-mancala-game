@@ -19,10 +19,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.management.Query;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.refEq;
 
 @ExtendWith(MockitoExtension.class)
 public class GameServiceTest {
@@ -32,7 +36,8 @@ public class GameServiceTest {
     @Mock PlayerPitsRepository playerPitsRepository;
     @Mock
     PlayerGamesRepository playerGamesRepository;
-    @InjectMocks GameService gameService;
+    @InjectMocks //@Spy
+    GameService gameService;
 
     private List<PlayerPitsData> pitsData = new ArrayList<>();
     private List<PlayerPitsDataDto> expectedPlayerPitsList;
@@ -266,7 +271,17 @@ public class GameServiceTest {
     void shouldCaptureOpponentsStones() {
         PlayerPitsData currentPit = pitsDataForCaptureCase.get(3);
 
+        List<PlayerPitsData> pitsToUpdate = new ArrayList<>();
+        pitsToUpdate.add(PlayerPitsData.builder().id(7L).sequence(7).pebblesCount(25)
+                        .playerGame(PlayerGame.builder().id(1L).player(p1).game(game).build()).isStore(true).build());
+        pitsToUpdate.add(PlayerPitsData.builder().id(4L).sequence(4).pebblesCount(0)
+                        .playerGame(PlayerGame.builder().id(1L).player(p1).game(game).build()).isStore(false).build());
+        pitsToUpdate.add(PlayerPitsData.builder().id(10L).sequence(10).pebblesCount(0)
+                        .playerGame(PlayerGame.builder().id(2L).player(p2).game(game).build()).isStore(false).build());
+
         gameService.captureOpponentsStones(currentPit, pitsDataForCaptureCase);
+        Mockito.verify(playerPitsRepository).saveAll(refEq(pitsToUpdate));
+
 
     }
 }
