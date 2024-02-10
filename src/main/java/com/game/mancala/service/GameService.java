@@ -11,6 +11,7 @@ import com.game.mancala.repository.GamesRepository;
 import com.game.mancala.repository.PlayerGamesRepository;
 import com.game.mancala.repository.PlayerPitsRepository;
 import com.game.mancala.repository.PlayerRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,12 +24,13 @@ import java.util.stream.IntStream;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class GameService {
 
-    @Autowired private PlayerRepository playerRepository;
-    @Autowired private PlayerPitsRepository playerPitsRepository;
-    @Autowired private GamesRepository gamesRepository;
-    @Autowired private PlayerGamesRepository playerGamesRepository;
+    private PlayerRepository playerRepository;
+    private PlayerPitsRepository playerPitsRepository;
+    private GamesRepository gamesRepository;
+    private PlayerGamesRepository playerGamesRepository;
 
     private final Integer PITS_PER_PLAYER = 6;
     private final Integer PEBBLES_PER_PIT = 6;
@@ -41,11 +43,7 @@ public class GameService {
         List<Player> players = new ArrayList<>();
         List.of(createGameDto.getPlayerName()).forEach(name -> {
             if (name.isBlank()) {
-                try {
-                    throw new BusinessRuleException("Please enter valid player name...");
-                } catch (BusinessRuleException e) {
-                    throw new RuntimeException(e);
-                }
+                throw new BusinessRuleException("Please enter valid player name...");
             }
 
             Optional<Player> playerOpt = playerRepository.findByName(name.trim());
@@ -53,7 +51,7 @@ public class GameService {
             players.add(savedPlayer);
         });
 
-        Game game = Game.builder().startTime(Instant.now()).build();
+        Game game = Game.builder().gameUuid(UUID.randomUUID()).startTime(Instant.now()).build();
         game = gamesRepository.save(game);
         List<PlayerGame> playerGameList = createPlayerGameMapping(game, players);
         generatePlayerPitsData(playerGameList);
@@ -71,7 +69,7 @@ public class GameService {
         IntStream.range(0, players.size()).forEach(i -> {
             if (i == 0) {
                 toUpdate.add(players.get(i).toBuilder().isMyTurn(true).build());
-            }else {
+            } else {
                 toUpdate.add(players.get(i).toBuilder().isMyTurn(false).build());
             }
         });
@@ -114,9 +112,9 @@ public class GameService {
                     .playerGame(playerGames.get(i / total_pits_per_player))
                     .sequence(i + 1)
                     .build();
-            if ((i+1)% (total_pits_per_player) == 0) {
+            if ((i + 1) % (total_pits_per_player) == 0) {
                 pitData = pitData.toBuilder().pebblesCount(0).isStore(true).build();
-            }else {
+            } else {
                 pitData = pitData.toBuilder().pebblesCount(PEBBLES_PER_PIT).isStore(false).build();
             }
 
@@ -132,12 +130,19 @@ public class GameService {
                 .build();
     }
 
+    public GameDetailsDto getGameDetails(UUID gameId) {
+        List<PlayerPitsData> pits = playerPitsRepository.findByPlayerGameGameGameUuidOrderBySequence(gameId);
+        return GameDetailsDto.builder()
+                .pitsData(pits.stream().map(PlayerPitsData::toDto).collect(Collectors.toList()))
+                .build();
+    }
+
     public GameDetailsDto getGameDetails(Long gameId, boolean isGameOver) {
         List<PlayerPitsData> pits = playerPitsRepository.findByPlayerGameGameIdOrderBySequence(gameId);
         return GameDetailsDto.builder()
                 .pitsData(pits.stream().map(PlayerPitsData::toDto).collect(Collectors.toList()))
                 .isGameOver(isGameOver)
-                .winnerName(isGameOver? getWinnerName(pits):null)
+                .winnerName(isGameOver ? getWinnerName(pits) : null)
                 .build();
     }
 
@@ -154,7 +159,7 @@ public class GameService {
     public boolean isGameOver(List<PlayerPitsData> pits) {
         List<Player> playerList = getPlayersForCurrentGame(pits);
 
-        for(Player player : playerList) {
+        for (Player player : playerList) {
             int result = pits.stream().filter(p -> p.getPlayerGame().getPlayer().getId().equals(player.getId()) && !p.isStore())
                     .map(PlayerPitsData::getPebblesCount).reduce(Integer::sum).orElse(-1);
             if (result == 0) {
@@ -179,7 +184,7 @@ public class GameService {
             pitsToUpdate.forEach(pit -> {
                 if (pit.isStore()) {
                     pit.incrementPebbleCountBy(stonesToAddStore);
-                }else {
+                } else {
                     pit.resetPebbleCountToZero();
                 }
             });
@@ -187,7 +192,7 @@ public class GameService {
         });
 
         Game gameToUpdate = pitsData.get(0).getPlayerGame().getGame();
-        gamesRepository.save(gameToUpdate.toBuilder().isGameOver(true).build());
+        gamesRepository.save(gameToUpdate.toBuilder().isGameOver(true).endTime(Instant.now()).build());
     }
 
     private List<PlayerPitsData> distributePebbles(PlayerPitsData selectedPit, Long playerId, Long gameId) {
@@ -202,14 +207,14 @@ public class GameService {
         int startIndex = selectedPitSequence;
         for (int i = 0; i < pickedPebbles; i++) {
             PlayerPitsData currentPit = pits.get((startIndex + i) % totalPits);
-            boolean isLastPebble = (i == pickedPebbles-1);
+            boolean isLastPebble = (i == pickedPebbles - 1);
             boolean shouldAddPebble = true;
 
             if (!currentPit.getPlayerGame().getPlayer().getId().equals(playerId) && currentPit.isStore()) {
                 startIndex += 1;
                 currentPit = pits.get((startIndex + i) % totalPits);
                 currentPit.incrementPebbleCount();
-            }else{
+            } else {
                 if (isLastPebble) {
                     if (currentPit.getPebblesCount() == 0 && !currentPit.isStore()) {
                         captureOpponentsStones(currentPit, pits);
@@ -225,7 +230,7 @@ public class GameService {
             }
         }
 
-        if(switchPlayerTurn) {
+        if (switchPlayerTurn) {
             changePlayersTurn(playerId, pits);
         }
         return (List<PlayerPitsData>) playerPitsRepository.saveAll(pits);
@@ -235,7 +240,7 @@ public class GameService {
         List<Player> players = getPlayersForCurrentGame(pits);
         int total_players = players.size();
         OptionalInt optInt = IntStream.range(0, total_players).filter(i -> players.get(i).getId().equals(playerId)).findFirst();
-        if(optInt.isEmpty()) throw new BusinessRuleException("player not found.");
+        if (optInt.isEmpty()) throw new BusinessRuleException("player not found.");
 
         playerRepository.updatePlayersTurn(players.get(optInt.getAsInt()).getId(), false);
         playerRepository.updatePlayersTurn(players.get((optInt.getAsInt() + 1) % total_players).getId(), true);

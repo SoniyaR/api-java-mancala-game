@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/games")
 public class GameController {
@@ -21,6 +23,11 @@ public class GameController {
 
     @GetMapping(path = "/{id}")
     public GameDetailsDto getGameDetailsById(@PathVariable Long id) {
+        return gameService.getGameDetails(id);
+    }
+
+    @GetMapping(path = "/id/{id}")
+    public GameDetailsDto getGameDetailsById(@PathVariable UUID id) {
         return gameService.getGameDetails(id);
     }
 
