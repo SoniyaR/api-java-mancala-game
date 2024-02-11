@@ -1,7 +1,7 @@
 # Mancala Game Backend service
 
 #### Technical stack
-Java 17, H2 database, Junit Juniper
+Java 17, MySQL database, Junit Juniper
 
 
 #### Developers Guide
