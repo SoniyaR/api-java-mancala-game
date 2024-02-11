@@ -3,6 +3,8 @@ package com.game.mancala.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,10 +22,9 @@ public class PlayerGame {
     @JoinColumn(name = "game_id", referencedColumnName = "id")
     private Game game;
 
+    //one game can have multiple players
     @ManyToOne
     @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 
-//    @Column(name = "is_finished")
-//    private boolean isFinished;
 }

@@ -27,14 +27,6 @@ public class PlayerPitsData {
     @JoinColumn(name = "player_game_id", referencedColumnName = "id")
     private PlayerGame playerGame;
 
-//    @ManyToOne
-//    @JoinColumn(name = "player_id", referencedColumnName = "id")
-//    private Player player;
-
-//    @ManyToOne
-//    @JoinColumn(name = "game_id", referencedColumnName = "id")
-//    private Game game;
-
     @Column(name = "is_store")
     private boolean isStore;
 

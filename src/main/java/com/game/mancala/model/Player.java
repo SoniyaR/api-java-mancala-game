@@ -21,7 +21,4 @@ public class Player {
 
     @Column(name = "is_my_turn")
     private boolean isMyTurn;
-
-//    @OneToMany(fetch = FetchType.LAZY)
-//    private PlayerPitsData[] pits;
 }

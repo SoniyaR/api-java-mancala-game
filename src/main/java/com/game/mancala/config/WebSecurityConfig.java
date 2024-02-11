@@ -18,19 +18,4 @@ public class WebSecurityConfig implements WebMvcConfigurer{
                 .allowCredentials(true);
     }
 
-//    @Bean
-//    public WebMvcConfigurer corsMappingConfigurer() {
-//        return new WebMvcConfigurer() {
-//            @Override
-//            public void addCorsMappings(CorsRegistry registry) {
-//                registry.addMapping("/**")
-//                        .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE")//, "OPTIONS", "HEAD")
-//                        .maxAge(3600)
-//                        .allowedHeaders("Origin, X-Requested-With, Content-Type, Accept")
-////                        .exposedHeaders("X-Get-Header")
-//                        .allowedOrigins("*");
-////                        .allowedOrigins("http://localhost:3000/");
-//            }
-//        };
-//    }
 }
