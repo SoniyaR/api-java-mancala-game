@@ -27,10 +27,10 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class GameService {
 
-    private PlayerRepository playerRepository;
-    private PlayerPitsRepository playerPitsRepository;
-    private GamesRepository gamesRepository;
-    private PlayerGamesRepository playerGamesRepository;
+    private final PlayerRepository playerRepository;
+    private final PlayerPitsRepository playerPitsRepository;
+    private final GamesRepository gamesRepository;
+    private final PlayerGamesRepository playerGamesRepository;
 
     private final Integer PITS_PER_PLAYER = 6;
     private final Integer PEBBLES_PER_PIT = 6;
