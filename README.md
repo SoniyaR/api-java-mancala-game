@@ -11,6 +11,13 @@ Steps to use this service and test in local environment:
 3. Start server and access it on 8088 port
 4. To view database: http://localhost:8088/h2-console (Now changed to mysql database)
 
+#### Play locally on UI
+1. Clone the respository https://github.com/SoniyaR/web-react-mancala-game
+2. Open in your favourite IDE. Make sure you have npm installed.
+3. run - npm start and access on http://localhost:3000/
+4. Enjoy!
+
+
 ### Game Rules:
 
 #### Board Setup
