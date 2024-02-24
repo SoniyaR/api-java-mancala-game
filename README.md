@@ -9,7 +9,7 @@ Steps to use this service and test in local environment:
 1. Clone the repository in local
 2. Set run configurations
 3. Start server and access it on 8088 port
-4. To view database: http://localhost:8088/h2-console
+4. To view database: http://localhost:8088/h2-console (Now changed to mysql database)
 
 ### Game Rules:
 
