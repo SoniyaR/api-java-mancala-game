@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class PlayerService {
-    private PlayerPitsRepository pitsRepository;
+    private final PlayerPitsRepository pitsRepository;
 
     public List<Player> getPlayerDetails(Long gameId) {
         List<PlayerPitsData> pitsData = pitsRepository.findByPlayerGameGameIdOrderBySequence(gameId);
